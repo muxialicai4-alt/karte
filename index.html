@@ -121,7 +121,7 @@ body{font-family:-apple-system,'Hiragino Sans',sans-serif;background:#faf5f7;col
 .photo-del{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit}
 
 /* MEMO */
-.memo-area{width:100%;min-height:180px;border:none;outline:none;font-family:inherit;font-size:13px;line-height:1.7;color:var(--t);resize:vertical;padding:2px 0;background:transparent}
+.memo-area{width:100%;min-height:180px;height:auto;border:none;outline:none;font-family:inherit;font-size:13px;line-height:1.7;color:var(--t);resize:none;padding:2px 0;background:transparent;overflow:hidden;box-sizing:border-box}
 
 /* ALLERGY ALERT */
 .alert-row{background:#fff5f5;border-radius:8px;padding:8px 10px;margin-bottom:6px;border-left:3px solid #e87070;font-size:13px;color:#c03030;font-weight:600}
@@ -528,7 +528,7 @@ function detailHTML() {
   h += hairBlock(3, k);
 
   // メモ
-  h += sec('📝 メモ', `<textarea class="memo-area" oninput="saveMemo(this.value)" placeholder="メモを入力...">${esc(k.f_memo||'')}</textarea>`);
+  h += sec('📝 メモ', `<textarea class="memo-area" oninput="saveMemo(this.value);autoSize(this)" onfocus="autoSize(this)" placeholder="メモを入力...">${esc(k.f_memo||'')}</textarea>`);
 
   h += '<div style="height:24px"></div></div>';
   return h;
@@ -723,6 +723,19 @@ function saveMemo(v) {
   const k = getK(currentId); if (!k) return;
   k.f_memo = v; saveK(k);
 }
+function autoSize(el) {
+  el.style.height = 'auto';
+  el.style.height = (el.scrollHeight + 4) + 'px';
+}
+// 詳細画面表示時にmemoのサイズを自動調整
+const _origRenderDetail = window.renderDetail;
+document.addEventListener('DOMContentLoaded', function(){
+  // ページ表示後に既存のtextarea自動リサイズを行う MutationObserver
+  const obs = new MutationObserver(()=>{
+    document.querySelectorAll('textarea.memo-area').forEach(autoSize);
+  });
+  obs.observe(document.body, {childList:true, subtree:true});
+});
 
 // ===== PULL TO REFRESH =====
 (function(){
